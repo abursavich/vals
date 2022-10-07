@@ -1,13 +1,13 @@
 package tfstate
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/variantdev/vals/pkg/api"
-
 	"github.com/fujiwara/tfstate-lookup/tfstate"
+	"github.com/variantdev/vals/pkg/api"
 )
 
 type provider struct {
@@ -46,16 +46,17 @@ func (p *provider) GetString(key string) (string, error) {
 
 // Read state either from file or from backend
 func (p *provider) ReadTFState(f, k string) (*tfstate.TFState, error) {
+	ctx := context.TODO()
 	switch p.backend {
 	case "":
-		state, err := tfstate.ReadFile(f)
+		state, err := tfstate.ReadFile(ctx, f)
 		if err != nil {
 			return nil, fmt.Errorf("reading tfstate for %s: %w", k, err)
 		}
 		return state, nil
 	default:
 		url := p.backend + "://" + f
-		state, err := tfstate.ReadURL(url)
+		state, err := tfstate.ReadURL(ctx, url)
 		if err != nil {
 			return nil, fmt.Errorf("reading tfstate for %s: %w", k, err)
 		}
